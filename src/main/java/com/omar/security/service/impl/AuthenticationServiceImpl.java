@@ -2,8 +2,11 @@ package com.omar.security.service.impl;
 
 import com.omar.security.dao.response.LoginResponse;
 import com.omar.security.dao.response.RegisterResponse;
+import com.omar.security.exceptions.NotFoundAuthenticatedUserException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -45,16 +48,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public LoginResponse login(LoginRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+    public LoginResponse login(LoginRequest request) throws NotFoundAuthenticatedUserException{
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            request.getEmail(),
+                            request.getPassword()
+                    )
+            );
+        }catch (AuthenticationException exception){
+            throw new NotFoundAuthenticatedUserException("Not Authenticated User");
+        }
 
         var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid email or password."));
+                .orElseThrow(() -> new UsernameNotFoundException("There is no user with that email!!"));
         var jwt = jwtService.generateToken(user);
         return LoginResponse.builder()
                 .isAuthenticated(true)
