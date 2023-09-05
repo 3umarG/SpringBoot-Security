@@ -18,11 +18,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeoutException;
 
 
 @ControllerAdvice
 @ResponseBody
 public class ControllerExceptionHandler {
+
+
+    @ExceptionHandler(TimeoutException.class)
+    @ResponseStatus(HttpStatus.REQUEST_TIMEOUT)
+    public ResponseEntity<ApiCustomResponse<?>> handleTimeoutException(
+            TimeoutException e,
+            WebRequest request
+    ){
+        return ResponseEntity.status(HttpStatus.REQUEST_TIMEOUT.value())
+                .body(ApiCustomResponse.builder()
+                        .data(null)
+                        .message(e.getMessage())
+                        .statusCode(HttpStatus.REQUEST_TIMEOUT.value())
+                        .isSuccess(false)
+                        .build());
+    }
 
     @ExceptionHandler(UsernameNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
