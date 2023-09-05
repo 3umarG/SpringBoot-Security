@@ -5,4 +5,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 public interface UserService {
     UserDetailsService userDetailsService() throws UsernameNotFoundException;
+
+    int enableAppUser(String email);
 }
