@@ -1,4 +1,4 @@
-package com.omar.security.config;
+package com.omar.security.config.filters;
 
 import java.io.IOException;
 
