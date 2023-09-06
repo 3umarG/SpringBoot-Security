@@ -1,14 +1,10 @@
 package com.omar.security.responses;
 
 import lombok.Builder;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 
 @Builder
-@RequiredArgsConstructor
-public final class ApiCustomResponse<T> {
-    private final String message;
-    private final int statusCode;
-    private final Boolean isSuccess;
-    private final T data;
-
+public record ApiCustomResponse<T>(String message, int statusCode, Boolean isSuccess, T data) {
 }
