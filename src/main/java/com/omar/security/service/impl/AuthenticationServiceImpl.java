@@ -27,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -174,7 +176,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         var user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("There is no user with that email!!"));
-        var jwt = jwtService.generateToken(user);
+
+        Map<String, Object> claims = Map.of(
+                "id", user.getId(),
+                "firstName", user.getFirstName(),
+                "lastName", user.getLastName(),
+                "email", user.getEmail(),
+                "roles", List.of(user.getRole())
+        );
+        var jwt = jwtService.generateToken(claims, user);
 
         try {
             authenticationManager.authenticate(
@@ -228,5 +238,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 confirmationToken.getUser().getEmail());
 
         return "confirmed";
+    }
+
+    @Override
+    public User getUserFromToken(String token) {
+        var userName = jwtService.extractUserName(token);
+        return userRepository.findByEmail(userName)
+                .orElseThrow(() -> new NotFoundAuthenticatedUserException("There is no User with that Token!!"));
     }
 }
