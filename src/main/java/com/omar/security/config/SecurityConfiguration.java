@@ -31,7 +31,6 @@ public class SecurityConfiguration {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserService userService;
 
-    // TODO :
     @Autowired
     @Qualifier("delegatedAuthenticationEntryPoint")
     private AuthenticationEntryPoint authEntryPoint;
@@ -46,7 +45,6 @@ public class SecurityConfiguration {
                 .authenticationProvider(authenticationProvider()).addFilterBefore(
                         jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(c -> c.authenticationEntryPoint(authEntryPoint));
-//                .addFilterBefore(filterChainExceptionHandler, LogoutFilter.class);
 
         return http.build();
     }

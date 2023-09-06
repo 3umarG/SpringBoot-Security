@@ -2,6 +2,7 @@ package com.omar.security.entities;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -75,5 +76,15 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public Map<String,Object> getClaims(){
+        return Map.of(
+                "id", getId(),
+                "firstName", getFirstName(),
+                "lastName", getLastName(),
+                "email", getEmail(),
+                "roles", List.of(getRole())
+        );
     }
 }
