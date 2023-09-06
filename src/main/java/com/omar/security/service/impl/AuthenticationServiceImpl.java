@@ -3,7 +3,10 @@ package com.omar.security.service.impl;
 import com.omar.security.dao.response.LoginResponse;
 import com.omar.security.dao.response.RegisterResponse;
 import com.omar.security.entities.ConfirmationToken;
+import com.omar.security.exceptions.AlreadyConfirmedEmailException;
 import com.omar.security.exceptions.NotFoundAuthenticatedUserException;
+import com.omar.security.exceptions.NotFoundTokenException;
+import com.omar.security.exceptions.TokenExpiredException;
 import com.omar.security.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,7 +70,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         confirmationTokenService.save(confirmationToken);
         LOGGER.info(confirmationToken.getToken());
 
-        // TODO : SEND EMAIL WITH THAT TOKEN
         String confirmUri = "localhost:8080/api/v1/auth/confirm?token=" + token;
         emailSenderService.sendEmail(
                 request.getEmail(),
@@ -138,7 +140,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
                "      <td style=\"font-family:Helvetica,Arial,sans-serif;font-size:19px;line-height:1.315789474;max-width:560px\">\n" +
                "        \n" +
-               "            <p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + name + ",</p><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> Thank you for registering. Please click on the below link to activate your account: </p><blockquote style=\"Margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\"><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> <a href=\""+ link +"\">Activate Now</a> </p></blockquote>\n Link will expire in 15 minutes. <p>See you soon</p>" +
+               "            <p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\">Hi " + name + ",</p><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> Thank you for registering. Please click on the below link to activate your account: </p><blockquote style=\"Margin:0 0 20px 0;border-left:10px solid #b1b4b6;padding:15px 0 0.1px 15px;font-size:19px;line-height:25px\"><p style=\"Margin:0 0 20px 0;font-size:19px;line-height:25px;color:#0b0c0c\"> <a href=\"" + link + "\">Activate Now</a> </p></blockquote>\n Link will expire in 15 minutes. <p>See you soon</p>" +
                "        \n" +
                "      </td>\n" +
                "      <td width=\"10\" valign=\"middle\"><br></td>\n" +
@@ -168,6 +170,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public LoginResponse login(LoginRequest request) throws NotFoundAuthenticatedUserException {
+
+
+        var user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new UsernameNotFoundException("There is no user with that email!!"));
+        var jwt = jwtService.generateToken(user);
+
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -179,9 +187,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new NotFoundAuthenticatedUserException("Not Authenticated User");
         }
 
-        var user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new UsernameNotFoundException("There is no user with that email!!"));
-        var jwt = jwtService.generateToken(user);
         return LoginResponse.builder()
                 .isAuthenticated(true)
                 .userName(user.getUsername())
@@ -194,24 +199,28 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Transactional
     @Override
-    public String confirm(String token) {
+    public String confirm(String token)
+            throws NotFoundTokenException,
+            AlreadyConfirmedEmailException,
+            TokenExpiredException {
         ConfirmationToken confirmationToken = confirmationTokenService
                 .getToken(token)
-                .orElseThrow(()-> new IllegalStateException("Not Found Token!!")); // TODO: custom not found token exception
+                .orElseThrow(() -> new NotFoundTokenException("Not Found Token!!"));
 
         // check for the token is already active
-        if(confirmationToken.getConfirmedAt() != null){
-            throw new IllegalStateException("email already confirmed"); // TODO : already confirmed exception
+        if (confirmationToken.getConfirmedAt() != null) {
+            LOGGER.warn("Already Confirmed Email!!");
+            throw new AlreadyConfirmedEmailException("email already confirmed");
         }
 
 
         // check for expiration date
         LocalDateTime expirationDate = confirmationToken.getExpiresOn();
-        if(expirationDate.isBefore(LocalDateTime.now())){
-            throw new IllegalStateException("Token expired"); // TODO : expired token exception
+        if (expirationDate.isBefore(LocalDateTime.now())) {
+            throw new TokenExpiredException("Token expired");
         }
 
-        // update both the confiramtionToken for confirmedAt
+        // update both the confirmationToken for confirmedAt
         // & user himself make him enabled
         confirmationTokenService.setConfirmedAt(token);
 

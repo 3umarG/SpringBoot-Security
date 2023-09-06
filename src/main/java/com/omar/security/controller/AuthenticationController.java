@@ -2,6 +2,9 @@ package com.omar.security.controller;
 
 import com.omar.security.dao.response.LoginResponse;
 import com.omar.security.dao.response.RegisterResponse;
+import com.omar.security.exceptions.AlreadyConfirmedEmailException;
+import com.omar.security.exceptions.NotFoundTokenException;
+import com.omar.security.exceptions.TokenExpiredException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +21,7 @@ import java.util.concurrent.TimeoutException;
 @RequiredArgsConstructor
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
+
     @PostMapping("/signup")
     public ResponseEntity<RegisterResponse> signup(@RequestBody SignUpRequest request) throws TimeoutException {
         return ResponseEntity.ok(authenticationService.signup(request));
@@ -29,7 +33,10 @@ public class AuthenticationController {
     }
 
     @GetMapping("/confirm")
-    public ResponseEntity<?> confirm(@RequestParam String token){
+    public ResponseEntity<?> confirm(@RequestParam String token)
+            throws NotFoundTokenException,
+            AlreadyConfirmedEmailException,
+            TokenExpiredException {
         return ResponseEntity.ok(authenticationService.confirm(token));
     }
 }
