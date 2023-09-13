@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingRequestHeaderException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
@@ -154,6 +155,22 @@ public class ControllerExceptionHandler {
                 .build();
     }
 
+    @ExceptionHandler(MissingRequestHeaderException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ResponseEntity<ApiCustomResponse<?>> handleMissingRequestHeaderException(
+            MissingRequestHeaderException e,
+            WebRequest request
+    ){
+        return ResponseEntity.badRequest().body(
+                ApiCustomResponse.builder()
+                        .data(null)
+                        .message(e.getMessage())
+                        .statusCode(400)
+                        .isSuccess(false)
+                        .build()
+        );
+    }
+
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -163,7 +180,7 @@ public class ControllerExceptionHandler {
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .body(ApiCustomResponse.builder()
                     .data(null)
-                    .message(ex.getMessage())
+                    .message(ex.getClass() +" - " + ex.getMessage())
                     .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
                     .isSuccess(false)
                     .build());
