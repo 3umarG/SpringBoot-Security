@@ -1,7 +1,7 @@
 package com.omar.security.service.impl;
 
-import com.omar.security.dao.response.LoginResponse;
-import com.omar.security.dao.response.RegisterResponse;
+import com.omar.security.dtos.response.LoginResponse;
+import com.omar.security.dtos.response.RegisterResponse;
 import com.omar.security.entities.ConfirmationToken;
 import com.omar.security.exceptions.AlreadyConfirmedEmailException;
 import com.omar.security.exceptions.NotFoundAuthenticatedUserException;
@@ -17,8 +17,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.omar.security.dao.request.SignUpRequest;
-import com.omar.security.dao.request.LoginRequest;
+import com.omar.security.dtos.request.SignUpRequest;
+import com.omar.security.dtos.request.LoginRequest;
 import com.omar.security.entities.Role;
 import com.omar.security.entities.User;
 import com.omar.security.repository.UserRepository;
@@ -108,7 +108,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public LoginResponse login(LoginRequest request) throws NotFoundAuthenticatedUserException {
+    public LoginResponse login(LoginRequest request)
+            throws NotFoundAuthenticatedUserException {
 
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new UsernameNotFoundException("There is no user with that email!!"));

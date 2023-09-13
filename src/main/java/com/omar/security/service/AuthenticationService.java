@@ -1,9 +1,9 @@
 package com.omar.security.service;
 
-import com.omar.security.dao.request.SignUpRequest;
-import com.omar.security.dao.request.LoginRequest;
-import com.omar.security.dao.response.LoginResponse;
-import com.omar.security.dao.response.RegisterResponse;
+import com.omar.security.dtos.request.SignUpRequest;
+import com.omar.security.dtos.request.LoginRequest;
+import com.omar.security.dtos.response.LoginResponse;
+import com.omar.security.dtos.response.RegisterResponse;
 import com.omar.security.entities.User;
 import com.omar.security.exceptions.AlreadyConfirmedEmailException;
 import com.omar.security.exceptions.NotFoundAuthenticatedUserException;

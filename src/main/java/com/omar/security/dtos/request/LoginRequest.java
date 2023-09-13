@@ -1,4 +1,4 @@
-package com.omar.security.dao.request;
+package com.omar.security.dtos.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

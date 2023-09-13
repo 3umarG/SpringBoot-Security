@@ -1,4 +1,4 @@
-package com.omar.security.dao.response;
+package com.omar.security.dtos.response;
 
 import com.omar.security.entities.Role;
 import lombok.AllArgsConstructor;

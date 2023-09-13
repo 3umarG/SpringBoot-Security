@@ -1,15 +1,15 @@
 package com.omar.security.controller;
 
-import com.omar.security.dao.response.LoginResponse;
-import com.omar.security.dao.response.RegisterResponse;
+import com.omar.security.dtos.response.LoginResponse;
+import com.omar.security.dtos.response.RegisterResponse;
 import com.omar.security.exceptions.AlreadyConfirmedEmailException;
 import com.omar.security.exceptions.NotFoundTokenException;
 import com.omar.security.exceptions.TokenExpiredException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.omar.security.dao.request.SignUpRequest;
-import com.omar.security.dao.request.LoginRequest;
+import com.omar.security.dtos.request.SignUpRequest;
+import com.omar.security.dtos.request.LoginRequest;
 import com.omar.security.service.AuthenticationService;
 
 import lombok.RequiredArgsConstructor;
