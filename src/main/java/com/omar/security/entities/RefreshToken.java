@@ -8,7 +8,6 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Entity
 @Table(name = "users_refresh_tokens")
@@ -30,9 +29,10 @@ public class RefreshToken {
     private LocalDateTime revokedOn;
 
     @Transient
-    private boolean isExpired = expiresOn.isBefore(LocalDateTime.now());
+    private boolean isExpired;
 
-    private boolean isActive = !isExpired && revokedOn == null;
+    @Transient
+    private boolean isActive;
 
 
     @ManyToOne
@@ -45,5 +45,21 @@ public class RefreshToken {
         this.token = token;
         this.createdOn = createdOn;
         this.expiresOn = expiresOn;
+    }
+
+    public RefreshToken(Integer id,
+                        String token,
+                        LocalDateTime createdOn,
+                        LocalDateTime expiresOn,
+                        LocalDateTime revokedOn,
+                        User user) {
+        this.id = id;
+        this.token = token;
+        this.createdOn = createdOn;
+        this.expiresOn = expiresOn;
+        this.revokedOn = revokedOn;
+        this.isExpired = expiresOn.isBefore(LocalDateTime.now());
+        this.isActive = !isExpired && revokedOn == null;
+        this.user = user;
     }
 }
