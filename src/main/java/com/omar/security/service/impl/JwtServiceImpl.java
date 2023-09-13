@@ -4,6 +4,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -60,6 +61,11 @@ public class JwtServiceImpl implements JwtService {
     @Override
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
+    }
+
+
+    public static String generateRefreshToken() {
+        return UUID.randomUUID().toString();
     }
 
     private Claims extractAllClaims(String token) {

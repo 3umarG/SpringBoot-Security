@@ -17,4 +17,5 @@ public class LoginResponse {
     private Role role;
     private boolean isAuthenticated;
     private String accessToken;
+    private String refreshToken;
 }

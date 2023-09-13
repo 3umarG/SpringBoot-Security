@@ -1,14 +1,15 @@
 package com.omar.security.entities;
 
+import com.omar.security.service.JwtService;
+import com.omar.security.service.impl.JwtServiceImpl;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Entity
 @Table(name = "users_refresh_tokens")
 @Setter
@@ -18,6 +19,7 @@ public class RefreshToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "token_id")
     private Integer id;
 
     private String token;
@@ -61,5 +63,14 @@ public class RefreshToken {
         this.isExpired = expiresOn.isBefore(LocalDateTime.now());
         this.isActive = !isExpired && revokedOn == null;
         this.user = user;
+    }
+
+    public static RefreshToken generateRefreshToken(User user) {
+        return RefreshToken.builder()
+                .createdOn(LocalDateTime.now())
+                .expiresOn(LocalDateTime.now().plusDays(7))
+                .token(JwtServiceImpl.generateRefreshToken())
+                .user(user)
+                .build();
     }
 }

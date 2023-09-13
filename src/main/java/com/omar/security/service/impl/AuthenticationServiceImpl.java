@@ -3,10 +3,13 @@ package com.omar.security.service.impl;
 import com.omar.security.dtos.response.LoginResponse;
 import com.omar.security.dtos.response.RegisterResponse;
 import com.omar.security.entities.ConfirmationToken;
+import com.omar.security.entities.RefreshToken;
+import com.omar.security.entities.projection.RefreshTokenProjection;
 import com.omar.security.exceptions.AlreadyConfirmedEmailException;
 import com.omar.security.exceptions.NotFoundAuthenticatedUserException;
 import com.omar.security.exceptions.NotFoundTokenException;
 import com.omar.security.exceptions.TokenExpiredException;
+import com.omar.security.repository.RefreshTokenRepository;
 import com.omar.security.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeoutException;
 
@@ -42,6 +46,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final EmailSenderService emailSenderService;
     private final UserService userService;
     private final EmailBuilder emailBuilder;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final static Logger LOGGER = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
 
     @Override
@@ -117,6 +122,34 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Map<String, Object> claims = user.getClaims();
         var jwt = jwtService.generateToken(claims, user);
 
+        authenticateLoginRequest(request);
+
+        String token;
+
+        Optional<RefreshTokenProjection> refreshTokenForUserEmail = refreshTokenRepository
+                .findActiveTokenByUserEmailNativeQuery(user.getEmail());
+
+        if (refreshTokenForUserEmail.isEmpty()) {
+            RefreshToken refreshToken = createNewRefreshTokenForUser(user);
+            saveRefreshTokenToDb(refreshToken);
+            token = refreshToken.getToken();
+        } else {
+            token = refreshTokenForUserEmail.get().getToken();
+        }
+
+        return buildLoginResponse(user, jwt, token);
+    }
+
+    private void saveRefreshTokenToDb(RefreshToken refreshToken) {
+        refreshTokenRepository.save(refreshToken);
+    }
+
+    private static RefreshToken createNewRefreshTokenForUser(User user) {
+        RefreshToken refreshToken = RefreshToken.generateRefreshToken(user);
+        return refreshToken;
+    }
+
+    private void authenticateLoginRequest(LoginRequest request) {
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -127,17 +160,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         } catch (AuthenticationException exception) {
             throw new NotFoundAuthenticatedUserException("Not Authenticated User");
         }
-
-        return buildLoginResponse(user, jwt);
     }
 
-    private static LoginResponse buildLoginResponse(User user, String jwt) {
+    private static LoginResponse buildLoginResponse(User user, String jwt, String refreshToken) {
         return LoginResponse.builder()
                 .isAuthenticated(true)
                 .userName(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole())
                 .accessToken(jwt)
+                .refreshToken(refreshToken)
                 .build();
     }
 
