@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "confirmation_tokens")
+@Table(name = "_confirmation_tokens")
 public class ConfirmationToken {
 
     @Id
