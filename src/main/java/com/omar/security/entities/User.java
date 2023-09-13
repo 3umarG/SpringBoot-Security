@@ -34,6 +34,9 @@ public class User implements UserDetails {
     private boolean enabled = false;
     private boolean locked = false;
 
+    @OneToMany(mappedBy = "user")
+    private List<RefreshToken> refreshTokens;
+
 
     public User(String firstName,
                 String lastName,
