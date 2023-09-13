@@ -218,4 +218,30 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return userRepository.findByEmail(userName)
                 .orElseThrow(() -> new NotFoundAuthenticatedUserException("There is no User with that Token!!"));
     }
+
+    @Override
+    public String refreshToken(String refreshToken) {
+        RefreshTokenProjection refreshTokenProjection = getRefreshTokenProjection(refreshToken);
+
+        LOGGER.info(String.valueOf(refreshTokenProjection.getTokenUserId()));
+        User user = getUserById(refreshTokenProjection.getTokenUserId());
+
+        String refreshedJwtToken = jwtService.generateToken(user);
+
+        return refreshedJwtToken;
+    }
+
+    private User getUserById(Integer id) {
+        User user = userRepository
+                .findById(id)
+                .orElseThrow(() -> new NotFoundAuthenticatedUserException("There is no user has this refresh token!!"));
+        return user;
+    }
+
+    private RefreshTokenProjection getRefreshTokenProjection(String refreshToken) {
+        RefreshTokenProjection refreshTokenProjection = refreshTokenRepository
+                .findValidRefreshTokenWithToken(refreshToken)
+                .orElseThrow(() -> new NotFoundTokenException("Not Found Token OR Revoked !!"));
+        return refreshTokenProjection;
+    }
 }

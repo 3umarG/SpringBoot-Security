@@ -5,4 +5,5 @@ package com.omar.security.entities.projection;
  */
 public interface RefreshTokenProjection {
     String getToken();
+    Integer getTokenUserId();
 }

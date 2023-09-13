@@ -39,4 +39,14 @@ public class AuthenticationController {
             TokenExpiredException {
         return ResponseEntity.ok(authenticationService.confirm(token));
     }
+
+
+    @GetMapping("/refresh-token")
+    public ResponseEntity<?> refreshToken(@RequestHeader("Authorization") String refreshToken){
+        if(refreshToken == null){
+            throw new NotFoundTokenException("Required Refresh Token in the header");
+        }
+
+        return ResponseEntity.ok(authenticationService.refreshToken(refreshToken));
+    }
 }

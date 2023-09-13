@@ -14,7 +14,7 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Inte
 
     Optional<RefreshToken> findByUser_Id(Integer id);
 
-    @Query(value = "Select t.token , t.user_id as token_user_id ,u.user_id AS user_id " +
+    @Query(value = "Select t.token , t.user_id as tokenUserId ,u.user_id AS userId " +
                    "FROM users_refresh_tokens as t " +
                    "JOIN users as u " +
                    "ON u.user_id = t.user_id " +
@@ -30,4 +30,13 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshToken, Inte
            "AND rt.expiresOn > current_timestamp " +
            "AND rt.revokedOn IS NULL")
     Optional<RefreshToken> findActiveTokenWithUserEmailJPQL(String email);
+
+
+    @Query(value = "Select t.token , t.user_id as tokenUserId " +
+                   "FROM users_refresh_tokens as t " +
+                   "WHERE t.token = ?1 " +
+                   "AND Date(t.expires_on) > current_date " +
+                   "AND t.revoked_on isnull ",
+            nativeQuery = true)
+    Optional<RefreshTokenProjection> findValidRefreshTokenWithToken(String token);
 }

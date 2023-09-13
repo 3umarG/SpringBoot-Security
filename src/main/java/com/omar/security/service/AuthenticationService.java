@@ -21,4 +21,6 @@ public interface AuthenticationService {
     String confirm(String token) throws NotFoundTokenException, AlreadyConfirmedEmailException, TokenExpiredException;
 
     User getUserFromToken(String token);
+
+    String refreshToken(String refreshToken);
 }
