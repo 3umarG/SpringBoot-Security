@@ -33,49 +33,8 @@ public class DelegatedAuthenticationEntryPoint implements AuthenticationEntryPoi
     @Override
     public void commence(HttpServletRequest request,
                          HttpServletResponse response,
-                         AuthenticationException authException)
-            throws IOException {
-        // TODO : that will give the handling process to the @ControllerAdvice
+                         AuthenticationException authException) {
         LOGGER.warn("Enter the `Commence` method");
         resolver.resolveException(request, response, null, authException);
-
-        // TODO : handle the exception from entry point
-        /*
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        response.setContentType("application/json");
-
-        LOGGER.warn(authException.getMessage());
-
-        if (authException instanceof AlreadyConfirmedEmailException) {
-            var apiResponse = ApiCustomResponse.builder()
-                    .message("Email already confirmed")
-                    .statusCode(400)
-                    .isSuccess(false).build();
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            response.getWriter().write(mapper.writeValueAsString(apiResponse));
-        } else if (authException instanceof TokenExpiredException) {
-            var apiResponse = ApiCustomResponse.builder()
-                    .message(authException.getMessage())
-                    .statusCode(401)
-                    .isSuccess(false).build();
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write(mapper.writeValueAsString(apiResponse));
-        } else if (authException instanceof NotFoundTokenException) {
-            var apiResponse = ApiCustomResponse.builder()
-                    .message(authException.getMessage())
-                    .statusCode(404)
-                    .isSuccess(false).build();
-            response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-            response.getWriter().write(new ObjectMapper().writeValueAsString(apiResponse));
-        } else {
-            var apiResponse = ApiCustomResponse.builder()
-                    .message("Authentication Failed")
-                    .statusCode(401)
-                    .isSuccess(false).build();
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write(mapper.writeValueAsString(apiResponse));
-        }
-
-         */
     }
 }
